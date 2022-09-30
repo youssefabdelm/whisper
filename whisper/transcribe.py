@@ -347,6 +347,8 @@ def get_probability_of_correctness(audio_path, text, model, language, task):
     audio = load_audio(audio_path, sr=SAMPLE_RATE)
     mel = log_mel_spectrogram(audio)
     
+    dtype = torch.float16 if decode_options.get("fp16", True) else torch.float32
+    
     segment = pad_or_trim(mel, N_FRAMES).to(model.device).to(dtype)
     logits = model.logits(tokens, segment)
     return logits.softmax(dim=-1)
