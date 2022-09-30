@@ -364,7 +364,7 @@ def get_probability_of_correctness(audio_path, text, model, language, task):
     '''
         
     tokens = torch.tensor(tokens)
-    logits = model.logits(tokens.to(model.device).to(dtype), segment)
+    logits = model.logits(tokens.to(model.device), segment)
     return logits.softmax(dim=-1)
 
 
