@@ -347,11 +347,24 @@ def get_probability_of_correctness(audio_path, text, model, language, task):
     audio = load_audio(audio_path, sr=SAMPLE_RATE)
     mel = log_mel_spectrogram(audio)
     
+    
+    
     dtype = torch.float32
     
     segment = pad_or_trim(mel, N_FRAMES).to(model.device).to(dtype)
+    
+    '''
+    single = mel.ndim == 2
+    if single:
+        mel = mel.unsqueeze(0)
+
+    # skip encoder forward pass if already-encoded audio features were given
+    if mel.shape[-2:] != (model.dims.n_audio_ctx, model.dims.n_audio_state):
+        mel = model.encoder(mel)
+    '''
+        
     tokens = torch.tensor(tokens)
-    logits = model.logits(tokens.to(model.device), segment)
+    logits = model.logits(tokens.to(model.device).to(dtype), segment)
     return logits.softmax(dim=-1)
 
 
