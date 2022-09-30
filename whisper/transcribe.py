@@ -322,7 +322,7 @@ def convert_text_to_tokens(text, model, language, task='transcribe'):
 
 
 
-def get_probability_of_correctness(audio_path, text, model, language):
+def get_probability_of_correctness(audio_path, text, model, language, task):
     """
     Given some text, and an audio segment, return
     the probability that the text is correct
@@ -343,7 +343,7 @@ def get_probability_of_correctness(audio_path, text, model, language):
     N_FRAMES = exact_div(N_SAMPLES, HOP_LENGTH)  # 3000: number of frames in a mel spectrogram input
 
 
-    tokens = convert_text_to_tokens(text, model, language)
+    tokens = convert_text_to_tokens(text, model, language, task=task)
     audio = load_audio(audio_path, sr=SAMPLE_RATE)
     mel = log_mel_spectrogram(audio)
     
