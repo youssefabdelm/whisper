@@ -350,6 +350,7 @@ def get_probability_of_correctness(audio_path, text, model, language, task):
     dtype = torch.float32
     
     segment = pad_or_trim(mel, N_FRAMES).to(model.device).to(dtype)
+    tokens = torch.tensor(tokens)
     logits = model.logits(tokens, segment)
     return logits.softmax(dim=-1)
 
