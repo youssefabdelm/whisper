@@ -309,6 +309,48 @@ def cli():
         with open(os.path.join(output_dir, audio_basename + ".srt"), "w", encoding="utf-8") as srt:
             write_srt(result["segments"], file=srt)
 
+def convert_text_to_tokens(text, model, language, task='transcribe'):
+    """
+    Given some text, encode it to tokens by the model
+    
+    Parameters
+    ----------
+    text: str of words
+    """
+    tokenizer = get_tokenizer(model.is_multilingual, language=language, task=task)
+    return tokenizer.encode(text)
+
+
+
+def get_probability_of_correctness(audio_path, text, model):
+    """
+    Given some text, and an audio segment, return
+    the probability that the text is correct
+    
+    Parameters
+    ----------
+    audio: np.ndarray
+        The audio segment
+    text: str
+        The text to be transcribed
+    """
+    SAMPLE_RATE = 16000
+    N_FFT = 400
+    N_MELS = 80
+    HOP_LENGTH = 160
+    CHUNK_LENGTH = 30
+    N_SAMPLES = CHUNK_LENGTH * SAMPLE_RATE  # 480000: number of samples in a chunk
+    N_FRAMES = exact_div(N_SAMPLES, HOP_LENGTH)  # 3000: number of frames in a mel spectrogram input
+
+
+    tokens = convert_text_to_tokens(text)
+    audio = load_audio(audio_path, sr=SAMPLE_RATE)
+    mel = log_mel_spectrogram(audio)
+    
+    segment = pad_or_trim(mel, N_FRAMES).to(model.device).to(dtype)
+    logits = model.logits(tokens, segment)
+    return logits.softmax(dim=-1)
+
 
 if __name__ == '__main__':
     cli()
